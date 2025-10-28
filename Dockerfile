@@ -46,27 +46,15 @@ USER appuser
 RUN mkdir -p /home/appuser/.deepface/weights
 
 # Preload models to reduce cold start time
-RUN python -c "\
+RUN python -c "import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; \
     from deepface import DeepFace; \
-    import os; \
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'; \
-    try: \
-    from deepface.basemodels import SFace; \
-    from deepface.extendedmodels import Age, Gender, Race, Emotion; \
-    print('Loading SFace model...'); \
-    SFace.loadModel(); \
-    print('Loading Age model...'); \
-    Age.loadModel(); \
-    print('Loading Gender model...'); \
-    Gender.loadModel(); \
-    print('Loading Race model...'); \
-    Race.loadModel(); \
-    print('Loading Emotion model...'); \
-    Emotion.loadModel(); \
-    print('All models loaded successfully!'); \
-    except Exception as e: \
-    print(f'Model loading completed with info: {e}'); \
-    "
+    import numpy as np; \
+    dummy_img = np.zeros((224, 224, 3), dtype=np.uint8); \
+    print('Preloading SFace model...'); \
+    DeepFace.represent(dummy_img, model_name='SFace', enforce_detection=False); \
+    print('Preloading analysis models...'); \
+    DeepFace.analyze(dummy_img, actions=['age', 'gender', 'race', 'emotion'], enforce_detection=False, silent=True); \
+    print('All models preloaded successfully!')"
 
 # Expose FastAPI port
 EXPOSE 8000
