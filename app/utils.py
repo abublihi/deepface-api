@@ -1,12 +1,13 @@
 # utils.py
-import os
-import tempfile
-import shutil
 import base64
-import aiohttp
+import os
+import shutil
+import tempfile
 from typing import Optional
-from fastapi import Request, UploadFile, HTTPException
+
+import aiohttp
 import numpy as np
+from fastapi import HTTPException, Request, UploadFile
 
 
 async def extract_image_from_request(

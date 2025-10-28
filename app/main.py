@@ -1,17 +1,20 @@
 # main.py
 import os
 from typing import Optional
-from fastapi import FastAPI, Request, UploadFile, File, Query
+
 from deepface import DeepFace
-from app.utils import extract_image_from_request, convert_numpy
-from fastapi import HTTPException
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+
+from app.utils import convert_numpy, extract_image_from_request
 
 app = FastAPI(title="DeepFace API with flexible image input")
+
 
 def parse_bool(value: Optional[str], default: bool) -> bool:
     if value is None:
         return default
     return value.lower() in ["true", "1", "yes"]
+
 
 @app.post("/represent")
 async def represent(
@@ -22,7 +25,7 @@ async def represent(
     enforce_detection: Optional[str] = Query("true", description="Enforce face detection (true/false)"),
     align: Optional[str] = Query("true", description="Align face before processing (true/false)"),
     anti_spoofing: Optional[str] = Query("true", description="Enable anti_spoofing (true/false)"),
-    max_faces: Optional[int] = Query(None, description="Set a limit on the number of faces to be processed (default is None)")
+    max_faces: Optional[int] = Query(None, description="Set a limit on the number of faces to be processed (default is None)"),
 ):
     enforce_detection_bool = parse_bool(enforce_detection, True)
     align_bool = parse_bool(align, True)
@@ -41,7 +44,7 @@ async def represent(
                 enforce_detection=enforce_detection_bool,
                 align=align_bool,
                 anti_spoofing=anti_spoofing_bool,
-                max_faces=max_faces
+                max_faces=max_faces,
             )
         except Exception as e:
             if "spoof detected" in str(e).lower():
@@ -49,7 +52,7 @@ async def represent(
                     status_code=422,
                     detail={
                         "spoofed": True,
-                        "message":"Spoofed image detected during representation extraction. you can disable anti spoofing by setting `anti_spoofing=false`"
+                        "message": "Spoofed image detected during representation extraction. you can disable anti spoofing by setting `anti_spoofing=false`",
                     },
                 )
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
@@ -59,7 +62,6 @@ async def represent(
     finally:
         if img_path and os.path.exists(img_path):
             os.remove(img_path)
-
 
 
 @app.post("/analyze")
@@ -87,7 +89,7 @@ async def analyze(
                 detector_backend=detector_backend,
                 enforce_detection=enforce_detection_bool,
                 align=align_bool,
-                anti_spoofing=anti_spoofing_bool
+                anti_spoofing=anti_spoofing_bool,
             )
         except Exception as e:
             if "spoof detected" in str(e).lower():
@@ -95,11 +97,11 @@ async def analyze(
                     status_code=422,
                     detail={
                         "spoofed": True,
-                        "message":"Spoofed image detected during representation extraction. you can disable anti spoofing by setting `anti_spoofing=false`"
+                        "message": "Spoofed image detected during representation extraction. you can disable anti spoofing by setting `anti_spoofing=false`",
                     },
                 )
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-        
+
         return convert_numpy(result)
 
     finally:
@@ -152,7 +154,7 @@ async def verify(
             raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
         return result
-        
+
     finally:
         for path in [img1_path, img2_path]:
             if path and os.path.exists(path):
