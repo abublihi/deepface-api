@@ -1,0 +1,108 @@
+import os
+from fastapi import FastAPI, Request, HTTPException
+from deepface import DeepFace
+from app.utils import extract_image_from_request, extract_deepface_options
+
+app = FastAPI(title="DeepFace API")
+
+
+@app.post("/represent")
+async def represent(request: Request):
+    image = None
+    try:
+        image = await extract_image_from_request(request, "img")
+
+        # Extract options
+        if request.headers.get("content-type", "").startswith("application/json"):
+            data = await request.json()
+        else:
+            form = await request.form()
+            data = dict(form)
+
+        options = extract_deepface_options(data)
+
+        embedding = DeepFace.represent(
+            img_path=image,
+            model_name=options["model_name"],
+            detector_backend=options["detector_backend"],
+            enforce_detection=options["enforce_detection"],
+            align=options["align"],
+        )
+
+        return {"embedding": embedding}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if image and os.path.exists(image):
+            os.remove(image)
+
+
+@app.post("/analyze")
+async def analyze(request: Request):
+    image = None
+    try:
+        image = await extract_image_from_request(request, "img")
+
+        if request.headers.get("content-type", "").startswith("application/json"):
+            data = await request.json()
+        else:
+            form = await request.form()
+            data = dict(form)
+
+        options = extract_deepface_options(data)
+
+        result = DeepFace.analyze(
+            img_path=image,
+            actions=["emotion", "age", "gender", "race"],
+            detector_backend=options["detector_backend"],
+            enforce_detection=options["enforce_detection"],
+            align=options["align"],
+        )
+
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if image and os.path.exists(image):
+            os.remove(image)
+
+
+@app.post("/verify")
+async def verify(request: Request):
+    img1_path = None
+    img2_path = None
+    try:
+        img1_path = await extract_image_from_request(request, "img1")
+        img2_path = await extract_image_from_request(request, "img2")
+
+        if request.headers.get("content-type", "").startswith("application/json"):
+            data = await request.json()
+        else:
+            form = await request.form()
+            data = dict(form)
+
+        options = extract_deepface_options(data)
+
+        result = DeepFace.verify(
+            img1_path=img1_path,
+            img2_path=img2_path,
+            model_name=options["model_name"],
+            detector_backend=options["detector_backend"],
+            distance_metric=options["distance_metric"],
+            enforce_detection=options["enforce_detection"],
+            align=options["align"],
+        )
+
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        for path in [img1_path, img2_path]:
+            if path and os.path.exists(path):
+                os.remove(path)

@@ -1,0 +1,79 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing (keep tests/ for now, but exclude cache)
+.pytest_cache/
+.coverage
+htmlcov/
+*.coverage
+.tox/
+.nox/
+*.test
+
+# IDE and editor files
+.vscode/
+.idea/
+.ropeproject/
+*.swp
+*.swo
+*.swn
+*.bak
+.DS_Store
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Docker files (don't need these inside the image)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Build artifacts
+dist/
+build/
+*.tar.gz
+*.zip
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+tmp*/
+
+# Images (exclude from Docker build, but tests/ images are needed)
+# Note: test images in tests/ directory are kept for CI/CD
+
+# Misc
+.DS_Store
+*.sqlite3
+*.db

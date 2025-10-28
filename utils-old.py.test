@@ -1,0 +1,93 @@
+import aiohttp
+import tempfile
+import shutil
+import base64
+import os
+from fastapi import Request, UploadFile
+
+async def extract_image_from_request(request: Request, img_key: str) -> str:
+    """
+    Extracts an image from a FastAPI request: file, base64, or URL.
+
+    Returns a temporary file path for DeepFace-compatible input.
+    """
+
+    # 1. Try to get form data (multipart or urlencoded)
+    form = await request.form()
+    file: UploadFile = form.get(img_key)
+
+    if isinstance(file, UploadFile):
+        return await save_uploaded_file(file)
+
+    # 2. Try base64 or URL from form or JSON
+    if request.headers.get("content-type", "").startswith("application/json"):
+        data = await request.json()
+    else:
+        data = form
+
+    img_data = data.get(img_key)
+
+    if not img_data:
+        raise ValueError(f"'{img_key}' not found in request body.")
+
+    # Handle base64 or URL
+    if isinstance(img_data, str) and img_data.startswith("http"):
+        return await download_image(img_data)
+    else:
+        return save_base64_image(img_data)
+
+
+async def save_uploaded_file(file: UploadFile) -> str:
+    temp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+    with open(temp.name, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return temp.name
+
+
+def save_base64_image(data: str) -> str:
+    try:
+        if "," in data:
+            data = data.split(",")[1]  # Remove data:image/...;base64, prefix
+
+        binary_data = base64.b64decode(data)
+        temp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+        with open(temp.name, "wb") as f:
+            f.write(binary_data)
+        return temp.name
+    except Exception:
+        raise ValueError("Invalid base64 image string")
+
+
+async def download_image(url: str) -> str:
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status != 200:
+                    raise ValueError("Failed to download image from URL")
+                temp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+                temp.write(await response.read())
+                temp.close()
+                return temp.name
+    except Exception:
+        raise ValueError("Invalid image URL")
+
+
+def extract_deepface_options(data: dict) -> dict:
+    """
+    Extract optional DeepFace configuration from the request data.
+    """
+    def get_bool(value):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in ['true', '1', 'yes']
+        return False
+
+    return {
+        "model_name": data.get("model_name", "VGG-Face"),
+        "detector_backend": data.get("detector_backend", "opencv"),
+        "distance_metric": data.get("distance_metric", "cosine"),
+        "enforce_detection": get_bool(data.get("enforce_detection", True)),
+        "align": get_bool(data.get("align", True)),
+        "anti_spoofing": get_bool(data.get("anti_spoofing", False)),
+    }

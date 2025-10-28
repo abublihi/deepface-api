@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+gunicorn
+deepface
+aiohttp
+numpy
+opencv-python-headless
+pytest
+pytest-asyncio
+httpx
+tf-keras
+python-multipart
+torch
