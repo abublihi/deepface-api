@@ -1,36 +1,28 @@
 # DeepFace API
 
-[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions/workflows/ci.yml)
+[![CI/CD Pipeline](https://github.com/abublihi/deepface-api/actions/workflows/ci.yml/badge.svg)](https://github.com/abublihi/deepface-api/actions/workflows/ci.yml)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-00a393.svg)](https://fastapi.tiangolo.com)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 
 A production-ready REST API for face recognition, verification, and analysis using DeepFace. Built with FastAPI and optimized for Docker deployment.
 
-## 🚀 Features
+## Disclaimer
 
-- **Face Recognition** - Extract face embeddings for identification
-- **Face Verification** - Compare two faces to verify if they belong to the same person
-- **Face Analysis** - Analyze age, gender, race, and emotions
-- **Anti-Spoofing** - Detect fake/spoofed faces
-- **Multiple Models** - Support for various face recognition models (SFace, VGG-Face, Facenet, etc.)
-- **Flexible Input** - Accept images via file upload or base64 encoding
-- **Production Ready** - Docker support with Gunicorn + Uvicorn workers
-- **Automated Testing** - Comprehensive test suite with GitHub Actions CI/CD
+This application was developed with assistance from an AI tool. The author reviewed, tested, and edited the generated code and documentation, and is solely responsible for its correctness, security, and license compliance.
 
 ## 📋 Table of Contents
 
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [API Endpoints](#api-endpoints)
-- [Usage Examples](#usage-examples)
-- [Docker Deployment](#docker-deployment)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Testing](#testing)
-- [CI/CD](#cicd)
-- [API Documentation](#api-documentation)
-- [License](#license)
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
+- [API Endpoints](#-api-endpoints)
+- [Usage Examples](#-usage-examples)
+- [Docker Deployment](#-docker-deployment)
+- [Configuration](#-configuration)
+- [Development](#-development)
+- [Testing](#-testing)
+- [CI/CD](#-cicd)
+- [License](#-license)
 
 ## 🏁 Quick Start
 
@@ -238,74 +230,6 @@ curl -X POST "http://localhost:8000/verify" \
   -F "model_name=SFace"
 ```
 
-### Python Example
-
-```python
-import requests
-
-# Represent (Extract embeddings)
-with open('face.jpg', 'rb') as img:
-    response = requests.post(
-        'http://localhost:8000/represent',
-        files={'img': img},
-        params={
-            'model_name': 'SFace',
-            'anti_spoofing': 'true'
-        }
-    )
-    result = response.json()
-    embedding = result[0]['embedding']
-    print(f"Embedding vector length: {len(embedding)}")
-
-# Analyze face
-with open('face.jpg', 'rb') as img:
-    response = requests.post(
-        'http://localhost:8000/analyze',
-        files={'img': img},
-        params={'actions': 'age,gender,emotion'}
-    )
-    result = response.json()
-    print(f"Age: {result[0]['age']}")
-    print(f"Gender: {result[0]['dominant_gender']}")
-    print(f"Emotion: {result[0]['dominant_emotion']}")
-
-# Verify faces
-with open('face1.jpg', 'rb') as img1, open('face2.jpg', 'rb') as img2:
-    response = requests.post(
-        'http://localhost:8000/verify',
-        files={'img1': img1, 'img2': img2},
-        params={'model_name': 'SFace'}
-    )
-    result = response.json()
-    print(f"Verified: {result['verified']}")
-    print(f"Distance: {result['distance']}")
-```
-
-### JavaScript/Node.js Example
-
-```javascript
-const FormData = require('form-data');
-const fs = require('fs');
-const axios = require('axios');
-
-async function analyzeface() {
-  const form = new FormData();
-  form.append('img', fs.createReadStream('face.jpg'));
-
-  const response = await axios.post('http://localhost:8000/analyze', form, {
-    headers: form.getHeaders(),
-    params: {
-      actions: 'age,gender,emotion',
-      anti_spoofing: 'true'
-    }
-  });
-
-  console.log(response.data);
-}
-
-analyzeface();
-```
-
 ## 🐳 Docker Deployment
 
 ### Build and Run
@@ -464,7 +388,7 @@ For detailed CI/CD documentation, see [.github/workflows/README.md](.github/work
 
 This project is licensed under the MIT License.
 
-## 🙏 Acknowledgments
+## 🌷 Acknowledgments
 
 - [DeepFace](https://github.com/serengil/deepface) - Face recognition library
 - [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
