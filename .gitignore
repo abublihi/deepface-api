@@ -29,5 +29,3 @@ build/
 
 # temp image files
 tmp*
-*.jpg
-*.png
